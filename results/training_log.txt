@@ -1,0 +1,330 @@
+(.venv) PS D:\nabila-tclassification> python run_experiment.py
+================================================================================
+🎓 EVALUASI ARSITEKTUR NLP: SIMPLE RNN vs LSTM vs TRANSFORMER (FROM SCRATCH)
+================================================================================
+🎯 Random Seed diatur ke: 42
+
+============================================================
+🌀 SKENARIO PANJANG MAKSIMUM TEKS: 50 TOKEN
+============================================================
+🔄 Memuat dataset BBC News dari Hugging Face...
+📊 Jumlah kata unik terdaftar di Vocab: 20000 / 20000
+✅ Data loaders berhasil dibuat (Sequence Length Max: 50)
+   - Train samples: 1041 (17 batches)
+   - Val samples: 184 (3 batches)
+   - Test samples: 1000 (16 batches)
+
+--------------------------------------------------
+📦 Melatih Model: SimpleRNN (Max Seq Len: 50)
+--------------------------------------------------
+⚙️ Jumlah Parameter Trainable: 2,593,669
+🚀 Mulai pelatihan model pada device: cuda...
+Epoch 01/08 | Train Loss: 1.6369 - Train Acc: 21.52% | Val Loss: 1.6306 - Val Acc: 22.28% | Time: 0.76s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 02/08 | Train Loss: 1.4655 - Train Acc: 41.88% | Val Loss: 1.6354 - Val Acc: 21.74% | Time: 0.55s
+Epoch 03/08 | Train Loss: 1.3511 - Train Acc: 49.38% | Val Loss: 1.6520 - Val Acc: 23.91% | Time: 0.53s
+  🛑 Early Stopping dipicu! Tidak ada perbaikan loss dalam 2 epoch berturut-turut.
+⏱️ Pelatihan selesai dalam 1.84 detik.
+🧪 Mengevaluasi SimpleRNN pada Test Set...
+   Accuracy  : 21.00%
+   F1-Score  : 19.91%
+   Train Time: 1.84s
+
+--------------------------------------------------
+📦 Melatih Model: LSTM (Max Seq Len: 50)
+--------------------------------------------------
+⚙️ Jumlah Parameter Trainable: 2,692,741
+🚀 Mulai pelatihan model pada device: cuda...
+Epoch 01/08 | Train Loss: 1.6065 - Train Acc: 22.09% | Val Loss: 1.5980 - Val Acc: 26.09% | Time: 0.53s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 02/08 | Train Loss: 1.5352 - Train Acc: 38.52% | Val Loss: 1.5832 - Val Acc: 30.43% | Time: 0.51s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 03/08 | Train Loss: 1.4596 - Train Acc: 48.41% | Val Loss: 1.5493 - Val Acc: 32.61% | Time: 0.51s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 04/08 | Train Loss: 1.2889 - Train Acc: 53.79% | Val Loss: 1.4047 - Val Acc: 45.65% | Time: 0.51s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 05/08 | Train Loss: 1.0005 - Train Acc: 66.38% | Val Loss: 1.2076 - Val Acc: 52.72% | Time: 0.51s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 06/08 | Train Loss: 0.7280 - Train Acc: 78.96% | Val Loss: 1.0648 - Val Acc: 58.70% | Time: 0.51s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 07/08 | Train Loss: 0.4613 - Train Acc: 87.61% | Val Loss: 1.0042 - Val Acc: 59.78% | Time: 0.51s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 08/08 | Train Loss: 0.3079 - Train Acc: 92.70% | Val Loss: 0.9181 - Val Acc: 66.30% | Time: 0.52s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+⏱️ Pelatihan selesai dalam 4.12 detik.
+🧪 Mengevaluasi LSTM pada Test Set...
+   Accuracy  : 62.90%
+   F1-Score  : 62.31%
+   Train Time: 4.12s
+
+--------------------------------------------------
+📦 Melatih Model: Transformer (Max Seq Len: 50)
+--------------------------------------------------
+⚙️ Jumlah Parameter Trainable: 2,825,605
+🚀 Mulai pelatihan model pada device: cuda...
+Epoch 01/08 | Train Loss: 1.6213 - Train Acc: 25.07% | Val Loss: 1.5485 - Val Acc: 33.70% | Time: 0.83s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 02/08 | Train Loss: 1.3975 - Train Acc: 46.59% | Val Loss: 1.2856 - Val Acc: 47.28% | Time: 0.63s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 03/08 | Train Loss: 0.9545 - Train Acc: 64.17% | Val Loss: 0.9098 - Val Acc: 66.30% | Time: 0.64s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 04/08 | Train Loss: 0.6478 - Train Acc: 76.95% | Val Loss: 0.8059 - Val Acc: 71.20% | Time: 0.62s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 05/08 | Train Loss: 0.4291 - Train Acc: 84.73% | Val Loss: 0.6056 - Val Acc: 81.52% | Time: 0.63s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 06/08 | Train Loss: 0.2654 - Train Acc: 91.64% | Val Loss: 0.6151 - Val Acc: 81.52% | Time: 0.62s
+Epoch 07/08 | Train Loss: 0.1644 - Train Acc: 94.33% | Val Loss: 0.6448 - Val Acc: 80.43% | Time: 0.62s
+  🛑 Early Stopping dipicu! Tidak ada perbaikan loss dalam 2 epoch berturut-turut.
+⏱️ Pelatihan selesai dalam 4.61 detik.
+🧪 Mengevaluasi Transformer pada Test Set...
+   Accuracy  : 80.00%
+   F1-Score  : 79.74%
+   Train Time: 4.61s
+
+============================================================
+🌀 SKENARIO PANJANG MAKSIMUM TEKS: 200 TOKEN
+============================================================
+🔄 Memuat dataset BBC News dari Hugging Face...
+📊 Jumlah kata unik terdaftar di Vocab: 20000 / 20000
+✅ Data loaders berhasil dibuat (Sequence Length Max: 200)
+   - Train samples: 1041 (17 batches)
+   - Val samples: 184 (3 batches)
+   - Test samples: 1000 (16 batches)
+
+--------------------------------------------------
+📦 Melatih Model: SimpleRNN (Max Seq Len: 200)
+--------------------------------------------------
+⚙️ Jumlah Parameter Trainable: 2,593,669
+🚀 Mulai pelatihan model pada device: cuda...
+Epoch 01/08 | Train Loss: 1.6185 - Train Acc: 24.50% | Val Loss: 1.6473 - Val Acc: 20.11% | Time: 0.76s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 02/08 | Train Loss: 1.4677 - Train Acc: 43.32% | Val Loss: 1.6712 - Val Acc: 23.91% | Time: 0.72s
+Epoch 03/08 | Train Loss: 1.3596 - Train Acc: 50.43% | Val Loss: 1.7011 - Val Acc: 25.00% | Time: 0.72s
+  🛑 Early Stopping dipicu! Tidak ada perbaikan loss dalam 2 epoch berturut-turut.
+⏱️ Pelatihan selesai dalam 2.20 detik.
+🧪 Mengevaluasi SimpleRNN pada Test Set...
+   Accuracy  : 26.00%
+   F1-Score  : 24.03%
+   Train Time: 2.20s
+
+--------------------------------------------------
+📦 Melatih Model: LSTM (Max Seq Len: 200)
+--------------------------------------------------
+⚙️ Jumlah Parameter Trainable: 2,692,741
+🚀 Mulai pelatihan model pada device: cuda...
+Epoch 01/08 | Train Loss: 1.6031 - Train Acc: 21.61% | Val Loss: 1.5993 - Val Acc: 25.54% | Time: 0.68s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 02/08 | Train Loss: 1.5337 - Train Acc: 40.73% | Val Loss: 1.5949 - Val Acc: 27.72% | Time: 0.60s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 03/08 | Train Loss: 1.4600 - Train Acc: 47.84% | Val Loss: 1.5843 - Val Acc: 27.17% | Time: 0.59s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 04/08 | Train Loss: 1.3211 - Train Acc: 52.74% | Val Loss: 1.5326 - Val Acc: 33.70% | Time: 0.59s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 05/08 | Train Loss: 1.1247 - Train Acc: 63.40% | Val Loss: 1.3768 - Val Acc: 41.30% | Time: 0.59s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 06/08 | Train Loss: 0.9191 - Train Acc: 71.57% | Val Loss: 1.2499 - Val Acc: 43.48% | Time: 0.59s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 07/08 | Train Loss: 0.7799 - Train Acc: 76.75% | Val Loss: 1.4362 - Val Acc: 42.93% | Time: 0.59s
+Epoch 08/08 | Train Loss: 0.6172 - Train Acc: 81.56% | Val Loss: 1.3401 - Val Acc: 46.20% | Time: 0.60s
+  🛑 Early Stopping dipicu! Tidak ada perbaikan loss dalam 2 epoch berturut-turut.
+⏱️ Pelatihan selesai dalam 4.85 detik.
+🧪 Mengevaluasi LSTM pada Test Set...
+   Accuracy  : 45.70%
+   F1-Score  : 43.22%
+   Train Time: 4.85s
+
+--------------------------------------------------
+📦 Melatih Model: Transformer (Max Seq Len: 200)
+--------------------------------------------------
+⚙️ Jumlah Parameter Trainable: 2,825,605
+🚀 Mulai pelatihan model pada device: cuda...
+Epoch 01/08 | Train Loss: 1.6305 - Train Acc: 23.15% | Val Loss: 1.5467 - Val Acc: 24.46% | Time: 0.89s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 02/08 | Train Loss: 1.4234 - Train Acc: 45.15% | Val Loss: 1.1634 - Val Acc: 51.63% | Time: 0.83s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 03/08 | Train Loss: 0.9769 - Train Acc: 62.92% | Val Loss: 0.8831 - Val Acc: 67.39% | Time: 0.76s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 04/08 | Train Loss: 0.6657 - Train Acc: 76.56% | Val Loss: 0.6267 - Val Acc: 76.63% | Time: 0.76s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 05/08 | Train Loss: 0.4225 - Train Acc: 85.40% | Val Loss: 0.4793 - Val Acc: 82.61% | Time: 0.85s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 06/08 | Train Loss: 0.2607 - Train Acc: 91.74% | Val Loss: 0.2884 - Val Acc: 89.67% | Time: 0.76s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 07/08 | Train Loss: 0.1297 - Train Acc: 95.87% | Val Loss: 0.3301 - Val Acc: 90.22% | Time: 0.76s
+Epoch 08/08 | Train Loss: 0.0911 - Train Acc: 97.12% | Val Loss: 0.3807 - Val Acc: 90.22% | Time: 0.83s
+  🛑 Early Stopping dipicu! Tidak ada perbaikan loss dalam 2 epoch berturut-turut.
+⏱️ Pelatihan selesai dalam 6.47 detik.
+🧪 Mengevaluasi Transformer pada Test Set...
+   Accuracy  : 87.10%
+   F1-Score  : 86.64%
+   Train Time: 6.47s
+
+============================================================
+🌀 SKENARIO PANJANG MAKSIMUM TEKS: 500 TOKEN
+============================================================
+🔄 Memuat dataset BBC News dari Hugging Face...
+📊 Jumlah kata unik terdaftar di Vocab: 20000 / 20000
+✅ Data loaders berhasil dibuat (Sequence Length Max: 500)
+   - Train samples: 1041 (17 batches)
+   - Val samples: 184 (3 batches)
+   - Test samples: 1000 (16 batches)
+
+--------------------------------------------------
+📦 Melatih Model: SimpleRNN (Max Seq Len: 500)
+--------------------------------------------------
+⚙️ Jumlah Parameter Trainable: 2,593,669
+🚀 Mulai pelatihan model pada device: cuda...
+Epoch 01/08 | Train Loss: 1.6049 - Train Acc: 21.04% | Val Loss: 1.5971 - Val Acc: 25.00% | Time: 0.63s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 02/08 | Train Loss: 1.5206 - Train Acc: 33.72% | Val Loss: 1.5975 - Val Acc: 25.00% | Time: 0.61s
+Epoch 03/08 | Train Loss: 1.4577 - Train Acc: 38.14% | Val Loss: 1.6115 - Val Acc: 22.83% | Time: 0.61s
+  🛑 Early Stopping dipicu! Tidak ada perbaikan loss dalam 2 epoch berturut-turut.
+⏱️ Pelatihan selesai dalam 1.85 detik.
+🧪 Mengevaluasi SimpleRNN pada Test Set...
+   Accuracy  : 25.00%
+   F1-Score  : 14.70%
+   Train Time: 1.85s
+
+--------------------------------------------------
+📦 Melatih Model: LSTM (Max Seq Len: 500)
+--------------------------------------------------
+⚙️ Jumlah Parameter Trainable: 2,692,741
+🚀 Mulai pelatihan model pada device: cuda...
+Epoch 01/08 | Train Loss: 1.6013 - Train Acc: 24.11% | Val Loss: 1.5917 - Val Acc: 27.17% | Time: 0.76s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 02/08 | Train Loss: 1.5526 - Train Acc: 33.33% | Val Loss: 1.5752 - Val Acc: 27.17% | Time: 0.74s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 03/08 | Train Loss: 1.5063 - Train Acc: 36.41% | Val Loss: 1.5603 - Val Acc: 28.26% | Time: 0.74s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 04/08 | Train Loss: 1.4552 - Train Acc: 35.73% | Val Loss: 1.5569 - Val Acc: 27.17% | Time: 0.74s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 05/08 | Train Loss: 1.4267 - Train Acc: 39.67% | Val Loss: 1.5697 - Val Acc: 28.26% | Time: 0.74s
+Epoch 06/08 | Train Loss: 1.3901 - Train Acc: 40.92% | Val Loss: 1.5664 - Val Acc: 29.35% | Time: 0.74s
+  🛑 Early Stopping dipicu! Tidak ada perbaikan loss dalam 2 epoch berturut-turut.
+⏱️ Pelatihan selesai dalam 4.46 detik.
+🧪 Mengevaluasi LSTM pada Test Set...
+   Accuracy  : 28.70%
+   F1-Score  : 19.84%
+   Train Time: 4.46s
+
+--------------------------------------------------
+📦 Melatih Model: Transformer (Max Seq Len: 500)
+--------------------------------------------------
+⚙️ Jumlah Parameter Trainable: 2,825,605
+🚀 Mulai pelatihan model pada device: cuda...
+Epoch 01/08 | Train Loss: 1.5444 - Train Acc: 28.34% | Val Loss: 1.4556 - Val Acc: 36.96% | Time: 1.60s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 02/08 | Train Loss: 1.3136 - Train Acc: 45.34% | Val Loss: 1.0753 - Val Acc: 59.24% | Time: 1.56s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 03/08 | Train Loss: 0.9252 - Train Acc: 64.94% | Val Loss: 0.7498 - Val Acc: 70.65% | Time: 1.49s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 04/08 | Train Loss: 0.6008 - Train Acc: 77.71% | Val Loss: 0.5147 - Val Acc: 80.43% | Time: 1.55s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 05/08 | Train Loss: 0.4172 - Train Acc: 85.69% | Val Loss: 0.3898 - Val Acc: 85.87% | Time: 1.52s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 06/08 | Train Loss: 0.2460 - Train Acc: 91.07% | Val Loss: 0.3081 - Val Acc: 88.04% | Time: 1.50s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 07/08 | Train Loss: 0.1591 - Train Acc: 95.10% | Val Loss: 0.3301 - Val Acc: 88.59% | Time: 1.55s
+Epoch 08/08 | Train Loss: 0.0864 - Train Acc: 97.79% | Val Loss: 0.2742 - Val Acc: 91.85% | Time: 1.50s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+⏱️ Pelatihan selesai dalam 12.31 detik.
+🧪 Mengevaluasi Transformer pada Test Set...
+   Accuracy  : 91.10%
+   F1-Score  : 90.75%
+   Train Time: 12.31s
+
+============================================================
+🌀 SKENARIO PANJANG MAKSIMUM TEKS: 1000 TOKEN
+============================================================
+🔄 Memuat dataset BBC News dari Hugging Face...
+📊 Jumlah kata unik terdaftar di Vocab: 20000 / 20000
+✅ Data loaders berhasil dibuat (Sequence Length Max: 1000)
+   - Train samples: 1041 (17 batches)
+   - Val samples: 184 (3 batches)
+   - Test samples: 1000 (16 batches)
+
+--------------------------------------------------
+📦 Melatih Model: SimpleRNN (Max Seq Len: 1000)
+--------------------------------------------------
+⚙️ Jumlah Parameter Trainable: 2,593,669
+🚀 Mulai pelatihan model pada device: cuda...
+Epoch 01/08 | Train Loss: 1.6058 - Train Acc: 22.00% | Val Loss: 1.6017 - Val Acc: 23.37% | Time: 0.74s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 02/08 | Train Loss: 1.5938 - Train Acc: 24.40% | Val Loss: 1.6010 - Val Acc: 23.91% | Time: 0.71s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 03/08 | Train Loss: 1.5863 - Train Acc: 23.15% | Val Loss: 1.6013 - Val Acc: 23.91% | Time: 0.71s
+Epoch 04/08 | Train Loss: 1.5839 - Train Acc: 24.59% | Val Loss: 1.6013 - Val Acc: 23.91% | Time: 0.71s
+  🛑 Early Stopping dipicu! Tidak ada perbaikan loss dalam 2 epoch berturut-turut.
+⏱️ Pelatihan selesai dalam 2.88 detik.
+🧪 Mengevaluasi SimpleRNN pada Test Set...
+   Accuracy  : 22.70%
+   F1-Score  : 7.96%
+   Train Time: 2.88s
+
+--------------------------------------------------
+📦 Melatih Model: LSTM (Max Seq Len: 1000)
+--------------------------------------------------
+⚙️ Jumlah Parameter Trainable: 2,692,741
+🚀 Mulai pelatihan model pada device: cuda...
+Epoch 01/08 | Train Loss: 1.6075 - Train Acc: 21.42% | Val Loss: 1.6019 - Val Acc: 23.37% | Time: 0.99s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 02/08 | Train Loss: 1.5977 - Train Acc: 24.30% | Val Loss: 1.6013 - Val Acc: 23.37% | Time: 0.97s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 03/08 | Train Loss: 1.5941 - Train Acc: 24.50% | Val Loss: 1.6012 - Val Acc: 23.91% | Time: 0.95s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 04/08 | Train Loss: 1.5907 - Train Acc: 24.59% | Val Loss: 1.6014 - Val Acc: 23.91% | Time: 0.97s
+Epoch 05/08 | Train Loss: 1.5874 - Train Acc: 24.59% | Val Loss: 1.6011 - Val Acc: 23.91% | Time: 0.96s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 06/08 | Train Loss: 1.5841 - Train Acc: 23.15% | Val Loss: 1.6019 - Val Acc: 23.37% | Time: 0.94s
+Epoch 07/08 | Train Loss: 1.5825 - Train Acc: 24.59% | Val Loss: 1.6020 - Val Acc: 23.37% | Time: 0.92s
+  🛑 Early Stopping dipicu! Tidak ada perbaikan loss dalam 2 epoch berturut-turut.
+⏱️ Pelatihan selesai dalam 6.70 detik.
+🧪 Mengevaluasi LSTM pada Test Set...
+   Accuracy  : 22.70%
+   F1-Score  : 7.97%
+   Train Time: 6.70s
+
+--------------------------------------------------
+📦 Melatih Model: Transformer (Max Seq Len: 1000)
+--------------------------------------------------
+⚙️ Jumlah Parameter Trainable: 2,825,605
+🚀 Mulai pelatihan model pada device: cuda...
+Epoch 01/08 | Train Loss: 1.5340 - Train Acc: 32.76% | Val Loss: 1.4584 - Val Acc: 35.87% | Time: 3.85s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 02/08 | Train Loss: 1.2721 - Train Acc: 47.55% | Val Loss: 1.1906 - Val Acc: 51.09% | Time: 3.64s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 03/08 | Train Loss: 0.9905 - Train Acc: 59.65% | Val Loss: 0.8588 - Val Acc: 67.39% | Time: 3.63s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 04/08 | Train Loss: 0.6834 - Train Acc: 76.08% | Val Loss: 0.7330 - Val Acc: 69.57% | Time: 3.80s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 05/08 | Train Loss: 0.4503 - Train Acc: 84.25% | Val Loss: 0.4698 - Val Acc: 83.70% | Time: 3.72s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 06/08 | Train Loss: 0.2657 - Train Acc: 91.35% | Val Loss: 0.6659 - Val Acc: 78.26% | Time: 3.64s
+Epoch 07/08 | Train Loss: 0.1909 - Train Acc: 94.04% | Val Loss: 0.4360 - Val Acc: 84.24% | Time: 3.62s
+  ⭐ Validation loss membaik! Menyimpan bobot terbaik...
+Epoch 08/08 | Train Loss: 0.1169 - Train Acc: 96.06% | Val Loss: 0.4608 - Val Acc: 85.87% | Time: 3.68s
+⏱️ Pelatihan selesai dalam 29.61 detik.
+🧪 Mengevaluasi Transformer pada Test Set...
+   Accuracy  : 84.80%
+   F1-Score  : 84.44%
+   Train Time: 29.61s
+
+📂 Semua hasil eksperimen sukses disimpan ke: D:\nabila-tclassification\results\experiment_results.json
+
+==========================================================================================
+📊 TABEL PERBANDINGAN AKHIR EKSPERIMEN (RNN vs LSTM vs TRANSFORMER)
+==========================================================================================
+ model_name  seq_length parameters training_time_seconds accuracy precision recall f1_score
+  SimpleRNN          50  2,593,669                 1.84s   21.00%    20.12% 20.21%   19.91%
+       LSTM          50  2,692,741                 4.12s   62.90%    65.82% 62.41%   62.31%
+Transformer          50  2,825,605                 4.61s   80.00%    80.23% 79.96%   79.74%
+  SimpleRNN         200  2,593,669                 2.20s   26.00%    24.26% 24.89%   24.03%
+       LSTM         200  2,692,741                 4.85s   45.70%    44.30% 44.03%   43.22%
+Transformer         200  2,825,605                 6.47s   87.10%    86.91% 86.64%   86.64%
+  SimpleRNN         500  2,593,669                 1.85s   25.00%    23.57% 22.97%   14.70%
+       LSTM         500  2,692,741                 4.46s   28.70%    25.61% 27.30%   19.84%
+Transformer         500  2,825,605                12.31s   91.10%    90.71% 90.87%   90.75%
+  SimpleRNN        1000  2,593,669                 2.88s   22.70%    34.52% 20.30%    7.96%
+       LSTM        1000  2,692,741                 6.70s   22.70%    35.19% 20.30%    7.97%
+Transformer        1000  2,825,605                29.61s   84.80%    86.11% 84.24%   84.44%
+==========================================================================================

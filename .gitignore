@@ -1,0 +1,32 @@
+# =====================================================================
+# GitIgnore for RNN vs LSTM vs Transformer Project
+# =====================================================================
+
+# 1. Virtual Environment (PENTING: Jangan pernah push folder ini karena berukuran >3GB!)
+.venv/
+venv/
+ENV/
+env/
+
+# 2. Python compiled files (Cache eksekusi internal Python)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ipynb_checkpoints/
+
+# 3. OS-specific files (File sampah bawaan Windows / Mac)
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# 4. IDE and Editor Settings (Konfigurasi personal VS Code / PyCharm)
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
