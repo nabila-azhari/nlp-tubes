@@ -1,114 +1,103 @@
+# Analisis Akademik Eksperimen Klasifikasi Teks: Simple RNN vs LSTM vs Transformer
 
-=========================================================================================
-🎓 ANALISIS AKADEMIS: RNN vs LSTM vs TRANSFORMER (EVALUASI PADA MATA KULIAH PBA)
-=========================================================================================
+Dokumen ini berisi analisis mendalam terhadap source code, konfigurasi, arsitektur, dan hasil eksperimen klasifikasi teks menggunakan dataset BBC News, yang membandingkan performa Simple RNN, LSTM, dan Transformer.
 
-Sebagai bahan persiapan Ujian Lisan mata kuliah Pengolahan Bahasa Alami (PBA), berikut adalah 
-jawaban ilmiah dan mendalam atas 5 pertanyaan utama evaluasi arsitektur:
+## 1. Struktur Folder dan Fungsi Setiap File
+Berdasarkan eksplorasi repositori, berikut adalah struktur folder dan fungsinya:
+- **`src/config.py`**: Berisi seluruh konfigurasi hyperparameter sentral, definisi arsitektur, panjang sekuens, parameter training (batch size, learning rate), letak direktori, dan random seed.
+- **`src/data_utils.py`**: Mengelola dataset. Mendefinisikan class `Vocabulary` untuk tokenisasi dan encoding, class `BBCNewsDataset` untuk membungkus data menjadi format PyTorch, serta fungsi `get_data_loaders` untuk memuat data dari Hugging Face, membaginya (train/val/test), dan membuat Dataloader.
+- **`src/trainer.py`**: Berisi logika *training loop* (`train_epoch`) dan *validation loop* (`evaluate_epoch`), beserta mekanisme *early stopping* dan penyimpanan bobot model terbaik berdasarkan *validation loss*.
+- **`src/evaluate.py`**: Berisi fungsi penghitungan metrik performa (Accuracy, Precision, Recall, F1-Score) dan utilitas untuk menghitung jumlah parameter (*trainable parameters*) dari model.
+- **`src/models/rnn.py`**: Mendefinisikan arsitektur Simple RNN.
+- **`src/models/lstm.py`**: Mendefinisikan arsitektur LSTM dengan ekstraksi panjang sekuens dinamis.
+- **`src/models/transformer.py`**: Mendefinisikan arsitektur Transformer dari awal (Positional Encoding, Multi-Head Attention, Feed-Forward, Encoder Block, dan Classifier dengan mask-aware pooling).
+- **`run_experiment.py`**: Skrip utama eksekusi. Melakukan iterasi terhadap skenario panjang teks, melatih setiap model, mencatat hasil, dan menyimpannya dalam format JSON.
+- **`generate_plots.py`**: Mengenerasi visualisasi grafik perbandingan (Accuracy vs Length, Training Time, dll).
+- **`print_analysis.py`**: Mencetak teori dasar dan antisipasi tanya jawab sidang.
+- **`results/`** & **`plots/`**: Folder yang menyimpan hasil keluaran teks log eksperimen dan gambar grafik (format `.png`).
 
------------------------------------------------------------------------------------------
-❓ Pertanyaan 1: Mengapa Simple RNN mengalami penurunan performa ketika panjang teks bertambah?
------------------------------------------------------------------------------------------
-💡 Jawaban Teoritis:
-   Simple RNN (Elman RNN) memproses informasi secara berurutan (sequential). Pada setiap timestep t,
-   RNN menghitung hidden state h_t berdasarkan token input saat ini x_t dan hidden state sebelumnya h_{t-1}:
-   
-                     h_t = tanh( W_{hh} * h_{t-1} + W_{xh} * x_t + b_h )
+## 2. Environment dan Dependency yang Digunakan
+Sistem berjalan pada environment Python virtual (`.venv`). Dependency utama yang digunakan:
+- `torch>=2.0.0`: Framework Deep Learning untuk membangun dan melatih model.
+- `datasets>=2.12.0`: Digunakan untuk mengunduh dataset (`SetFit/bbc-news`) dari Hugging Face Hub.
+- `scikit-learn>=1.2.0`: Untuk fungsi pembagian data (`train_test_split`) dan evaluasi metrik (accuracy, precision, recall, f1_score).
+- `matplotlib>=3.7.0` & `seaborn>=0.12.0`: Untuk pembuatan grafik plot presentasi.
+- `pandas>=1.5.0`: Untuk menampilkan tabel summary akhir eksperimen.
 
-   Ketika teks bertambah panjang (misalnya dari 50 menjadi 1000 token), RNN menghadapi dua masalah utama:
-   1. Vanishing Gradient (Penyusutan Gradien): Saat melakukan BPTT (Backpropagation Through Time)
-      untuk sequence yang panjang, gradien harus dikalikan secara berulang dengan matriks bobot W_{hh}^T.
-      Secara matematis, jika nilai eigen dari W_{hh} kurang dari 1, perkalian berantai ini akan membuat
-      gradien menyusut secara eksponensial menuju nol (lim_{k -> inf} (W_{hh})^k = 0).
-      Akibatnya, bobot model di timestep-timestep awal tidak mengalami pembaruan berarti, dan model
-      kehilangan memori jangka panjang (lupa konteks awal artikel).
-   2. Information Bottleneck (Kemacetan Informasi): RNN mencoba mengompres seluruh informasi masa lalu
-      ke dalam satu vektor hidden state berukuran tetap (hidden_dim). Ketika sequence mencapai 1000 token,
-      hidden state terakhir dipaksa menampung terlalu banyak informasi, sehingga detail-detail penting
-      di awal kalimat akan terhimpit dan hilang.
+## 3. Urutan Eksekusi Project
+Eksekusi diinisiasi dengan menjalankan `python run_experiment.py`, alurnya adalah:
+1. **Inisialisasi Seed**: Menjalankan `set_seed(42)` untuk memastikan reproducibility.
+2. **Iterasi Skenario**: Mengulang proses untuk `max_len` = [50, 200, 500, 1000].
+3. **Persiapan Data**: Untuk setiap `max_len`, `get_data_loaders` dipanggil untuk menghasilkan *train/val/test splits*.
+4. **Pelatihan Model**: Untuk setiap model (RNN, LSTM, Transformer):
+   - Model diinisiasi ulang untuk menghindari kebocoran memori (leakage).
+   - Fungsi `train_model` melatih model (max 8 epoch) dan memuat bobot terbaik berdasar validation loss terkecil (patience 2).
+5. **Evaluasi**: Model dievaluasi menggunakan `test_loader` melalui fungsi `evaluate_model`. Hasil ditampung ke dalam array.
+6. **Penyimpanan**: Metrik disimpan ke `results/experiment_results.json` dan dicetak di terminal. Skrip `generate_plots.py` kemudian bisa merender hasilnya.
 
------------------------------------------------------------------------------------------
-❓ Pertanyaan 2: Bagaimana LSTM mengatasi sebagian masalah RNN?
------------------------------------------------------------------------------------------
-💡 Jawaban Teoritis:
-   LSTM (Long Short-Term Memory) dirancang untuk memecahkan masalah vanishing gradient pada Simple RNN
-   melalui pengenalan Cell State (c_t) dan mekanisme Gating (Gerbang):
-   
-   1. Cell State (c_t) berfungsi sebagai "jalan tol informasi" linier yang membentang di seluruh urutan.
-      Informasi dapat mengalir di sepanjang cell state dengan modifikasi linier minimal, sehingga gradien
-      dapat mengalir ke belakang selama BPTT tanpa hambatan eksponensial. Ini dikenal sebagai
-      "Constant Error Carousel" (CEC).
-   2. Tiga Gate Utama untuk mengontrol aliran informasi:
-      - Forget Gate (f_t = sigma(W_f * [h_{t-1}, x_t] + b_f)): Menentukan informasi lama apa yang harus dibuang.
-      - Input Gate (i_t = sigma(W_i * [h_{t-1}, x_t] + b_i)): Menentukan informasi baru apa yang disimpan.
-      - Output Gate (o_t = sigma(W_o * [h_{t-1}, x_t] + b_o)): Menentukan bagian cell state mana yang dikirim ke hidden state h_t.
+## 4. Flow Data dari Dataset hingga Evaluasi
+- Dataset `SetFit/bbc-news` ditarik dari HuggingFace.
+- **Split**: Train 85%, Validation 15%, dan set Test murni.
+- **Tokenisasi**: Teks dikonversi ke *lowercase*, hanya karakter alfanumerik dan spasi yang dipertahankan. Kalimat dipecah menjadi *list of words*.
+- **Vocabulary Build**: Hanya dibangun dari Train set. Maksimal 20.000 token.
+- **Encoding & Padding**: Kata dipetakan ke indeks integer. Token asing diubah ke `<unk>`. Dilakukan padding di indeks 0.
+- **Forward Pass & Pooling**: 
+  - RNN/LSTM mengekstrak representasi menggunakan nilai akhir dinamis aktual (panjang sebelum padding).
+  - Transformer menggunakan operasi `Mask-Aware Global Average Pooling` untuk membuang kontribusi dari index 0.
 
-   Meskipun LSTM berhasil meredam vanishing gradient dan mempertahankan memori hingga ratusan token
-   (lebih baik dari RNN), LSTM tetap merupakan arsitektur sequential. Pada sequence ekstrem seperti 1000 token,
-   LSTM masih mengalami penurunan performa lambat laun karena ketergantungan sekuensial yang memaksa
-   representasi kata diakumulasikan secara bertahap, dan komputasinya tidak dapat diparalelkan.
+## 5. Hyperparameter Utama
+- **`EMBEDDING_DIM = 128` & `HIDDEN_DIM = 128`**: Menjaga jumlah parameter relatif setara antar model (±2.6 juta hingga 2.8 juta).
+- **Transformer (`TRANSFORMER_HEADS = 4`, `TRANSFORMER_LAYERS = 2`, `TRANSFORMER_FF_DIM = 256`)**: Menghasilkan ~2.8 Juta parameter (sekelas dengan RNN/LSTM).
+- **`NUM_EPOCHS = 8`, `LEARNING_RATE = 1e-3`, `PATIENCE = 2`**: Praktik standar untuk konvergensi dataset skala menengah dengan mitigasi overfitting.
 
------------------------------------------------------------------------------------------
-❓ Pertanyaan 3: Mengapa Transformer tetap stabil pada teks panjang?
------------------------------------------------------------------------------------------
-💡 Jawaban Teoritis:
-   Transformer mempertahankan kestabilan performa yang luar biasa pada teks panjang (500 hingga 1000 token+)
-   karena tiga faktor arsitektural utama:
-   
-   1. Jalur Komputasi O(1) (Non-sequential Routing): Berbeda dengan RNN dan LSTM yang membutuhkan N langkah 
-      komputasi untuk menghubungkan kata pertama dan kata ke-N, Transformer menghubungkan SETIAP pasang kata
-      secara langsung dalam satu langkah (jalur terpendek = O(1)). Tidak ada proses estafet informasi.
-   2. Penghapusan Kekhawatiran Gradien Menyusut akibat Waktu: Karena tidak ada perulangan waktu (no recurrence),
-      gradien selama backpropagation mengalir langsung dari output ke seluruh posisi token secara instan
-      melalui koneksi atensi dan koneksi residu (residual connections). Ini membuat aliran gradien sangat stabil
-      tidak peduli seberapa panjang teksnya.
-   3. Positional Encoding Sinusoidal: Memberikan penanda posisi absolut yang konsisten pada kata-kata di seluruh
-      panjang sequence, membantu model mempertahankan informasi sintaksis secara stabil bahkan untuk token
-      yang berada di posisi sangat jauh.
+## 6. Perbandingan Teori Model (Parameter, Komputasi, Memori)
+| Model | Parameter (~M) | Kompleksitas Waktu | Karakteristik |
+|---|---|---|---|
+| **Simple RNN** | 2.59 Juta | $O(N \cdot d^2)$ | Sekuensial murni. Rentan *vanishing gradient*. Cepat dihitung tapi sangat lupa konteks lama. |
+| **LSTM** | 2.69 Juta | $O(N \cdot d^2)$ | Sekuensial dengan *memory cell* dan gates. Mampu menahan memori medium-range, namun tetap sekuensial (sulit diparalelisasi penuh). |
+| **Transformer** | 2.82 Juta | $O(N^2 \cdot d)$ | Komputasi non-sekuensial (langsung O(1) ke seluruh kata) lewat *Self-Attention*. Waktu training naik kuadratik (terlihat di max_len=1000). |
 
------------------------------------------------------------------------------------------
-❓ Pertanyaan 4: Bagaimana self-attention membantu Transformer memahami konteks global?
------------------------------------------------------------------------------------------
-💡 Jawaban Teoritis:
-   Mekanisme Self-Attention menghitung representasi suatu token dengan menimbang hubungannya dengan 
-   SELURUH token lain di dalam kalimat secara simultan. Formulasi matematisnya adalah:
-   
-                               Attention(Q, K, V) = softmax( (Q * K^T) / sqrt(d_k) ) * V
+## 7. Analisis Hasil Eksperimen (Berdasarkan Run Terbaru)
+Hasil performa pada test set menunjukkan tren arsitektur dengan sangat jelas:
+- **Simple RNN**: Kewalahan parah di semua skenario teks. Rentang akurasinya mentok di ~21-26%. Ini membuktikan bahwa RNN murni tidak bisa menangkap dependensi pada klasifikasi sentimen dokumen (bahkan pada seq=50 sekalipun).
+- **LSTM**: Memperlihatkan performa moderat di teks sangat pendek (Akurasi **62.90%** di seq=50). Seiring bertambahnya sekuens (200, 500, 1000), performa stabil di kisaran ~44-49%. Meskipun algoritma *dynamic hidden state* bekerja mendeteksi *padding*, beban mengingat teks sangat panjang (keterbatasan memori sekuensial) membuat LSTM tidak mampu menandingi akurasi model berarsitektur paralel.
+- **Transformer**: Mendominasi mutlak! Tumbuh sejalan dengan panjang konteks: dari **80.00%** (seq=50), **87.10%** (seq=200), memuncak pada **89.00%** (seq=500), dan **89.20%** (seq=1000). Nilai F1-Score dan presisinya saling mengikuti erat dengan metrik akurasi makro.
 
-   Langkah pemahaman konteks global:
-   1. Proyeksi Q, K, V: Untuk setiap kata, model memproyeksikan representasinya menjadi vektor Query (Q),
-      Key (K), dan Value (V).
-   2. Matriks Korelasi (Q * K^T): Mengalikan Query kata t dengan Key semua kata lain. Hasilnya adalah skor kecocokan
-      yang menunjukkan seberapa erat hubungan semantis antara kata t dengan seluruh kata di artikel.
-   3. Scaling (sqrt(d_k)): Membagi skor dengan akar dimensi proyeksi untuk menjaga stabilitas nilai softmax
-      agar gradien tidak bernilai nol (vanishing softmax gradient).
-   4. Softmax: Menghasilkan bobot probabilitas distribusi atensi (attention weights) yang berjumlah 1.
-   5. Weighted Value: Mengalikan bobot tersebut dengan Value (V) untuk merangkum representasi konteks global.
+## 8. Skalabilitas Komputasi (Training Time)
+Transformer memperlihatkan kehebatannya di akurasi namun dengan *trade-off* kompleksitas waktu atensi $O(N^2)$:
+- Pada 50 dan 200 token, Transformer (~5-6 detik) melaju sedikit lebih lama dari LSTM (~4-5 detik) karena paralelisasi GPU menutupi beban beban perhitungannya.
+- Namun pada 1000 token, **waktu Transformer meroket hingga nyaris 30 detik**, berbanding dengan RNN dan LSTM yang hanya berkisar 3 - 6 detik. Perilaku logaritmik waktu pelatihan ini sesuai dengan ekspektasi teori atensi kuadratik.
 
-   Melalui Multi-Head Attention, model dapat secara simultan memperhatikan aspek hubungan yang berbeda.
-   Contoh: Head 1 fokus pada hubungan subjek-objek, Head 2 fokus pada kata keterangan waktu, meskipun
-   kata-kata tersebut terpisah sejauh 900 token di dalam artikel berita BBC.
+## 9. Potensi Inkonsistensi dan Kelemahan Metodologi
+1. **Pre-processing Minimalis**: Tidak adanya pembersihan *stopwords*, *stemming*, atau lemmatization. 
+2. **Tidak Menggunakan Subword Tokenization**: Penggunaan spasi `split()` sederhana tanpa Byte-Pair Encoding (BPE) rentan pada limitasi *Out-of-Vocabulary* (OOV). Model rawan bingung menghadapi kata-kata berimbuhan baru.
+3. **Pembatasan Epoch Singkat**: *Patience* 2 di *Early Stopping* bisa menghentikan eksplorasi gradien RNN/LSTM yang lambat konvergensinya secara terlalu dini.
 
------------------------------------------------------------------------------------------
-❓ Pertanyaan 5: Apakah peningkatan performa Transformer sebanding dengan kompleksitas dan waktu pelatihannya?
------------------------------------------------------------------------------------------
-💡 Jawaban Teoritis:
-   YA, sangat sebanding dan bahkan menjadi alasan utama mengapa Transformer mendominasi NLP modern.
-   Mari kita bedah berdasarkan trade-off matematis:
-   
-   1. Paralelisasi Komputasi vs Bottleneck Sekuensial:
-      - RNN/LSTM: Kompleksitas waktu per-layer adalah O(N * d^2) di mana N adalah panjang teks dan d adalah
-        dimensi embedding. Karena sifat sequential, langkah t TIDAK BISA dihitung sebelum langkah t-1 selesai.
-        GPU tidak dapat bekerja secara paralel penuh; akibatnya, training RNN pada teks panjang terasa sangat lambat.
-      - Transformer: Kompleksitas waktu per-layer adalah O(N^2 * d). Secara teoritis, kompleksitas terhadap
-        panjang teks kuadratik O(N^2). Namun, karena semua kata diproses SEKALIGUS secara paralel, Transformer
-        memanfaatkan arsitektur akselerator hardware (GPU/TPU) secara maksimal. Waktu eksekusi aktual sering kali
-        jauh lebih cepat daripada RNN/LSTM pada GPU modern.
-   
-   2. Skalabilitas Kemampuan (Capacity):
-      Transformer bertindak sebagai pembelajar kapasitas tinggi. Pada teks pendek (50 token), RNN/LSTM mungkin
-      cukup bersaing karena tugasnya sederhana. Namun pada teks panjang (500-1000 token), performa RNN/LSTM anjlok,
-      sedangkan Transformer tetap konsisten memberikan akurasi sangat tinggi. Peningkatan tipis pada waktu training
-      menghasilkan kompensasi peningkatan akurasi yang masif dan ketahanan model yang jauh lebih kokoh.
+## 10. Rekomendasi Riset Lanjutan (Future Work)
+- **Implementasi Bi-LSTM**: Arah baca teks ke belakang (backward) sangat membantu klasifikasi dokumen.
+- **Pra-pelatihan Vektor**: Mengganti `nn.Embedding` murni (*from scratch*) dengan inisialisasi bobot FastText, GloVe, atau Word2Vec yang sudah mempelajari relasi kata secara universal.
+- **Linformer / Sparse Attention**: Menggunakan mekanisme atensi hemat komputasi untuk menekan waktu 30 detik Transformer di teks skala besar.
 
-=========================================================================================
+## 11. Prediksi Pertanyaan Sidang & Jawaban Ideal
+**Q1: Mengapa akurasi Transformer jauh mengungguli LSTM di teks panjang (1000 kata)?**
+*Jawaban Ideal*: Karena LSTM masih bersifat *sequential*; ia memaksakan informasi 1000 kata untuk disarikan ke dalam satu gerbang *hidden state* kecil, menyebabkan *information bottleneck* (kepadatan informasi) atau lupa pada detail awal. Transformer menggunakan atensi *paralel*, yang artinya model bisa "melihat" kata pertama dan kata ke-1000 dengan biaya komputasi yang sama, menjaga pemahaman konteks lintas jarak yang jauh.
+
+**Q2: Mengapa waktu pelatihan (Training Time) Transformer melonjak secara eksponensial di panjang 1000 kata sedangkan LSTM lambat naiknya?**
+*Jawaban Ideal*: Transformer menghitung matriks perkalian seluruh kata dengan kata lainnya (*Self-Attention*) secara komplit, sehingga membutuhkan operasi dengan kompleksitas Waktu O(N^2). Ketika panjang teks diperbesar 5x (dari 200 ke 1000), komputasinya membengkak berkali-kali lipat (~30 detik). LSTM adalah O(N) dan memproses urutan linear, sehingga pertumbuhannya jauh lebih terukur, namun dengan *trade-off* kehilangan akurasi panjang.
+
+## 12. Rekomendasi Struktur Slide Presentasi (15 Halaman)
+1. **Title Slide**: Judul Tugas Besar NLP, Nama Mahasiswa.
+2. **Latar Belakang**: Teks klasifikasi berita, tantangan representasi panjang kalimat, evolusi RNN ke Transformer.
+3. **Tujuan Penelitian**: Komparasi *head-to-head* performa dan waktu komputasi LSTM vs Transformer *from scratch*.
+4. **Dataset & Preprocessing**: Penjelasan SetFit/bbc-news, Batasan 20K Kata, Padding, Train/Val/Test Split.
+5. **Skema Eksperimen**: Parameter model (~2.7 juta), Konfigurasi 8 Epochs, Batch 64, Adam Optimizer, Early Stopping.
+6. **Arsitektur 1 (LSTM)**: Representasi alur *Gates*, mitigasi *vanishing gradient*, pengambilan *dynamic lengths hidden state*.
+7. **Arsitektur 2 (Transformer)**: Ringkasan Blok *Encoder*, *Mask-Aware Pooling*, Positional Encoding.
+8. **Hasil Eksperimen - Tabel Komparasi Penuh**: Screenshot dari terminal *output*.
+9. **Visualisasi - Akurasi**: Menampilkan Plot grafik `accuracy_vs_length.png`. (Jelaskan selisih jauh Transformer vs LSTM).
+10. **Visualisasi - Waktu Komputasi**: Menampilkan Plot grafik `training_time_comparison.png`. (Tunjukkan kelonjakan drastis waktu Transformer di `max_len=1000`).
+11. **Analisis Kritis - Mengapa Transformer Lebih Baik?**: Jawaban teoritis dari *Information Bottleneck* dan jarak langkah atensi $O(1)$.
+12. **Analisis Kritis - Mengapa Transformer Lebih Lambat?**: Penjelasan mekanisme matriks perkalian atensi $O(N^2)$.
+13. **Evaluasi Kelemahan Umum Eksperimen**: Tokenisasi naif berbasis spasi (tidak ada BPE), absence pre-trained word embeddings.
+14. **Kesimpulan**: Transformer superior di akurasi namun sangat "lapar" sumber daya di komputasi, sementara recurrent models stagnan dalam kapasitas memori.
+15. **Saran & Tanya Jawab**: Rekomendasi masa depan (Bi-LSTM / Pre-trained FastText).

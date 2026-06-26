@@ -48,9 +48,14 @@ class LSTMClassifier(nn.Module):
         # c_n: cell state terakhir dari LSTM (memori jangka panjang) -> (1, batch_size, hidden_dim)
         out, (h_n, c_n) = self.lstm(embedded)
         
-        # Ambil hidden state timestep terakhir yang merangkum informasi kalimat
-        # out[:, -1, :] mengambil baris terakhir dari sumbu sequence_length
-        last_hidden = out[:, -1, :]  # shape: (batch_size, hidden_dim)
+        # MENGATASI BUG: Ekstrak hidden state pada timestep terakhir dari kata asli (bukan padding)
+        # 1. Buat mask untuk mencari token yang bukan padding
+        mask = (x != self.embedding.padding_idx)
+        # 2. Hitung panjang asli dari setiap kalimat (jumlah token non-padding)
+        lengths = mask.sum(dim=1).clamp(min=1)  # shape: (batch_size,)
+        # 3. Ambil hidden state tepat di indeks terakhir kata asli (lengths - 1)
+        batch_indices = torch.arange(out.size(0), device=out.device)
+        last_hidden = out[batch_indices, lengths - 1, :]  # shape: (batch_size, hidden_dim)
         
         # Klasifikasi ke dalam 5 kategori berita
         logits = self.fc(last_hidden)  # shape: (batch_size, num_classes)

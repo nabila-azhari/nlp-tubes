@@ -1,4 +1,9 @@
 import os
+import sys
+
+# Set stdout encoding to UTF-8 on Windows to prevent UnicodeEncodeError with emoji prints
+if sys.platform.startswith('win'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 def main():
     analysis_text = """

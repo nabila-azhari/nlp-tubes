@@ -1,8 +1,13 @@
 import os
 import json
+import sys
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+
+# Set stdout encoding to UTF-8 on Windows to prevent UnicodeEncodeError with emoji prints
+if sys.platform.startswith('win'):
+    sys.stdout.reconfigure(encoding='utf-8')
 from src.config import RESULTS_DIR, PLOTS_DIR
 
 def main():
