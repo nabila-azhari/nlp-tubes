@@ -1,0 +1,105 @@
+==========================================================================================
+RINGKASAN EVALUASI ARSITEKTUR NLP: SIMPLE RNN vs LSTM vs TRANSFORMER (FROM SCRATCH)
+Studi Kasus: Klasifikasi Berita BBC News (5 Kategori) Berdasarkan Skenario Panjang Sequence
+==========================================================================================
+
+1. DESKRIPSI EKSPERIMEN:
+- Dataset: BBC News (SetFit/bbc-news) dengan 5 kategori (business, entertainment, politics, sport, tech).
+- Pembagian Data: Train: 1041 sampel | Validation: 184 sampel | Test: 1000 sampel.
+- Hyperparameter: Embedding Dim = 128 | Hidden Dim = 128 | Vocab Size = 20,000.
+- Skenario Panjang Sequence yang Diuji (Token Max): 50, 200, 500, dan 1000.
+- Semua model diimplementasikan secara manual dari nol (from scratch) menggunakan PyTorch.
+
+==========================================================================================
+2. TABEL HASIL AKHIR PERBANDINGAN MODEL:
+==========================================================================================
+Model Name  | Seq Length | Parameters | Training Time | Accuracy | Precision | Recall  | F1-Score
+------------------------------------------------------------------------------------------
+SimpleRNN   | 50 token   | 2,593,669  | 1.86s         | 21.00%   | 20.12%    | 20.21%  | 19.91%
+LSTM        | 50 token   | 2,692,741  | 4.16s         | 62.90%   | 65.82%    | 62.41%  | 62.31%
+Transformer | 50 token   | 2,825,605  | 4.53s         | 80.00%   | 80.23%    | 79.96%  | 79.74%
+------------------------------------------------------------------------------------------
+SimpleRNN   | 200 token  | 2,593,669  | 1.79s         | 23.60%   | 23.08%    | 23.13%  | 22.98%
+LSTM        | 200 token  | 2,692,741  | 4.71s         | 49.20%   | 48.44%    | 47.67%  | 47.45%
+Transformer | 200 token  | 2,825,605  | 5.97s         | 87.10%   | 86.91%    | 86.64%  | 86.64%
+------------------------------------------------------------------------------------------
+SimpleRNN   | 500 token  | 2,593,669  | 3.11s         | 25.90%   | 25.72%    | 25.13%  | 25.09%
+LSTM        | 500 token  | 2,692,741  | 5.64s         | 49.60%   | 50.82%    | 47.27%  | 45.72%
+Transformer | 500 token  | 2,825,605  | 11.39s        | 89.00%   | 88.48%    | 88.57%  | 88.52%
+------------------------------------------------------------------------------------------
+SimpleRNN   | 1000 token | 2,593,669  | 3.55s         | 26.60%   | 26.06%    | 25.63%  | 25.52%
+LSTM        | 1000 token | 2,692,741  | 5.81s         | 44.20%   | 42.61%    | 42.38%  | 41.58%
+Transformer | 1000 token | 2,825,605  | 28.64s        | 89.20%   | 89.79%    | 88.62%  | 88.75%
+==========================================================================================
+
+==========================================================================================
+3. ALUR LANGKAH PEMROSESAN (FORWARD PASS) TIAP MODEL:
+==========================================================================================
+
+A. SIMPLE RNN CLASSIFIER:
+   - Langkah 1 (Embedding): Menerima input indeks token teks (indeks integer) dan memetakan 
+     masing-masing kata menjadi representasi vektor padat berdimensi 128 (EMBEDDING_DIM).
+   - Langkah 2 (Recurrent): Memproses barisan embedding kata secara sekuensial kata-demi-kata, 
+     memutakhirkan hidden state di setiap timestep berdasarkan input kata saat ini dan 
+     hidden state dari kata sebelumnya menggunakan aktivasi Tanh.
+   - Langkah 3 (Padding Extraction): Menggunakan mask (mencari indeks kata != 0) untuk menghitung 
+     panjang asli kalimat tanpa padding. Vektor representasi diambil dari output hidden state 
+     tepat pada indeks kata asli terakhir (lengths - 1) untuk mengabaikan bias padding token.
+   - Langkah 4 (Classification Head): Memasukkan vektor representasi terakhir tersebut ke 
+     lapisan Linear/Dense Layer untuk menghasilkan 5 output nilai logits (probabilitas kategori).
+
+B. LSTM CLASSIFIER:
+   - Langkah 1 (Embedding): Mengonversi barisan indeks token kata menjadi vektor embedding 128 dimensi.
+   - Langkah 2 (Gated Recurrent): Memproses urutan embedding secara sekuensial dengan mengatur 
+     jalur memori jangka panjang melalui Cell State (c_t) dan 3 Gerbang interaktif (Forget gate, 
+     Input gate, dan Output gate) di setiap timestep.
+   - Langkah 3 (Padding Extraction): Menerapkan mask pencarian token non-padding dan mengambil 
+     hidden state (h_t) tepat pada posisi kata riil terakhir (lengths - 1), memastikan 
+     informasi yang dilemparkan ke klasifikasi tidak tercemar oleh padding di akhir kalimat.
+   - Langkah 4 (Classification Head): Mengalirkan hidden state bersih tersebut ke lapisan Linear 
+     untuk memproyeksikan skor probabilitas logits ke 5 kategori berita.
+
+C. TRANSFORMER CLASSIFIER:
+   - Langkah 1 (Embedding + Positional Encoding): Mengubah kata menjadi embedding 128 dimensi 
+     lalu langsung menjumlahkannya dengan nilai Positional Encoding sinusoidal. Ini menyuntikkan 
+     informasi posisi/urutan kata karena Transformer memproses semua kata secara paralel (non-sekuensial).
+   - Langkah 2 (Encoder Blocks): Mengalirkan data ke 2 tumpukan Transformer Encoder Blocks. Di setiap 
+     blok, data diproses melalui Multi-Head Self-Attention (menghitung korelasi kognitif antar-kata 
+     secara paralel) lalu diteruskan ke Position-Wise Feed-Forward Network, distabilkan oleh 
+     koneksi residu dan Layer Normalization.
+   - Langkah 3 (Mask-Aware Global Average Pooling): Menggunakan mask agar model hanya merata-ratakan 
+     representasi kata riil saja di luar padding token (token padding bernilai 0 diabaikan agar 
+     tidak merusak/mengencerkan nilai rata-rata representasi kalimat).
+   - Langkah 4 (Classification Head): Hasil rata-rata representasi kalimat (pooled vector) 
+     dilewatkan ke linear layer untuk menghasilkan 5 logits kelas prediksi akhir.
+
+==========================================================================================
+4. KESIMPULAN UTAMA EKSPERIMEN:
+==========================================================================================
+a. Simple RNN mengalami Vanishing Gradient secara ekstrem. Gradien menyusut menuju nol saat melakukan 
+   BPTT pada sequence panjang. Akibatnya, bobot embedding kata di awal artikel tidak ter-update, 
+   dan prediksi hanya didasarkan pada kata terakhir. Akurasi sangat rendah (~21-26%), setara tebakan acak.
+   
+b. LSTM memperbaiki RNN melalui adanya Cell State (Constant Error Carousel) dan gating mechanism. 
+   Ini membantu mempertahankan ingatan hingga ratusan token. Namun, karena sifat komputasinya yang sekuensial, 
+   performa LSTM tetap menurun saat sequence didekatkan ke 1000 token (turun dari 62.90% ke 44.20%).
+   
+c. Transformer menunjukkan kestabilan dan keunggulan mutlak (~80-89% akurasi). Karena menggunakan 
+   Self-Attention, jarak interaksi antar kata adalah O(1) konstan, dan gradien dapat mengalir langsung 
+   tanpa rekurensi sekuensial. 
+   
+d. Peningkatan waktu pelatihan pada Transformer sangat sebanding dengan akurasi tinggi yang dihasilkan. 
+   Walau kompleksitas teoritisnya kuadratik O(N^2), sifat non-sekuensialnya membuat Transformer dapat 
+   diparalelkan sepenuhnya di GPU CUDA, sehingga durasi eksekusinya tetap sangat efisien.
+
+==========================================================================================
+5. POIN KUNCI UNTUK UJIAN LISAN PBA:
+==========================================================================================
+- Rumus RNN: h_t = tanh(W_hh * h_{t-1} + W_xh * x_t + b_h)
+- Mengapa RNN gagal pada teks panjang? Vanishing Gradient akibat perkalian berulang matriks W_hh^T saat BPTT.
+- Cara LSTM mengatasi? Menggunakan Cell State (c_t) sebagai bypass linier dan 3 Gates (Forget, Input, Output).
+- Cara Transformer mengatasi? Mengganti rekurensi waktu dengan Self-Attention dan jalur propagasi O(1).
+- Rumus Self-Attention: Attention(Q,K,V) = softmax( (Q * K^T) / sqrt(d_k) ) * V
+- Peran scaling factor 1/sqrt(d_k)? Menjaga nilai dot product agar tidak terlalu besar yang menyebabkan 
+  gradien softmax menjadi jenuh (zero gradient).
+==========================================================================================
